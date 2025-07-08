@@ -5,5 +5,6 @@
 namespace qol::impl {
     void endBootScreenEarly();
     void skipTitleScreenAppearAnim();
-    void tweakTitleAudio();
+    void tweakTitleAudio(FastBootMode mode);
+    void automateTitleScreen(FastBootMode mode);
 }  // namespace qol::impl

@@ -25,7 +25,8 @@ namespace {
         }
     };
 
-    // Play the title screen music sooner to make it sync up with `SkipTitleScreenAppearAnim`.
+    // If the mode is set to `StopAtTitleScreen`, play the title screen music sooner. This makes it
+    // sync up with `SkipTitleScreenAppearAnim`.
     struct PlayTitleMusicSooner : TrampolineHook<PlayTitleMusicSooner> {
         static void Install() {
             InstallAtSymbol("_ZN25HakoniwaStateBootLoadData7exeMenuEv");
@@ -40,9 +41,26 @@ namespace {
             Orig(self);
         }
     };
+
+    // If the mode is set to `Resume1P`, don’t play the title screen music at all. Otherwise, it
+    // will only play for a second before the stage fully loads.
+    struct DontPlayTitleMusic : TrampolineHook<DontPlayTitleMusic> {
+        static void Install() {
+            InstallAtSymbol("_ZN2al8startBgmEPKNS_15IUseAudioKeeperEPKcii");
+        }
+        static void Callback(const al::IUseAudioKeeper* audioKeeper, const char* name, int a,
+                             int b) {
+            if (name != nullptr && strcmp(name, "Title") == 0)
+                return;
+            Orig(audioKeeper, name, a, b);
+        }
+    };
 }  // namespace
 
-void qol::impl::tweakTitleAudio() {
+void qol::impl::tweakTitleAudio(FastBootMode mode) {
     DontPlayTitleCall::Install();
-    PlayTitleMusicSooner::Install();
+    if (mode == FastBootMode::StopAtTitleScreen)
+        PlayTitleMusicSooner::Install();
+    else
+        DontPlayTitleMusic::Install();
 }

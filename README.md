@@ -20,3 +20,8 @@ extern "C" void userMain() {
     // (all your other custom hooks and logic)
 }
 ```
+
+This tweak also provides an option for skipping the title screen as well, i.e. automatically selecting “Resume.” For example:
+```cpp
+    qol::enableFastBoot(qol::FastBootMode::Resume1P);
+```
